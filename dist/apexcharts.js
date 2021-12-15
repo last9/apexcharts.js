@@ -2441,6 +2441,11 @@
           if (w.config.yaxis[i] && w.config.yaxis[i].logarithmic) {
             return s.map(function (d) {
               if (d === null) return null;
+
+              if (w.config.yaxis[i].getLogVal) {
+                return w.config.yaxis[i].getLogVal(d);
+              }
+
               return _this.getLogVal(d, i);
             });
           } else {
@@ -2923,6 +2928,8 @@
         reversed: false,
         logarithmic: false,
         logBase: 10,
+        logs: undefined,
+        getLogVal: undefined,
         tickAmount: undefined,
         forceNiceScale: false,
         max: undefined,
@@ -11641,15 +11648,19 @@
       }
     }, {
       key: "logarithmicScale",
-      value: function logarithmicScale(yMin, yMax, base) {
-        var logs = [];
-        var ticks = Math.ceil(Math.log(yMax) / Math.log(base)) + 1; // Get powers of base up to our max, and then one more
+      value: function logarithmicScale(yMin, yMax, yAxis) {
+        var logs = _toConsumableArray(yAxis.logs || []);
 
-        for (var i = 0; i < ticks; i++) {
-          logs.push(Math.pow(base, i));
+        if (!logs.length) {
+          var base = yAxis.logBase;
+          var ticks = Math.ceil(Math.log(yMax) / Math.log(base)) + 1; // Get powers of base up to our max, and then one more
+
+          for (var i = 0; i < ticks; i++) {
+            logs.push(Math.pow(base, i));
+          }
         }
 
-        if (yMin === 0) {
+        if (yMin === 0 && logs[0] !== 0) {
           logs.unshift(yMin);
         }
 
@@ -11693,7 +11704,7 @@
 
         if (y.logarithmic && diff > 5) {
           gl.allSeriesCollapsed = false;
-          gl.yAxisScale[index] = this.logarithmicScale(minY, maxY, y.logBase);
+          gl.yAxisScale[index] = this.logarithmicScale(minY, maxY, y);
         } else {
           if (maxY === -Number.MAX_VALUE || !Utils$1.isNumber(maxY)) {
             // no data in the chart. Either all series collapsed or user passed a blank array

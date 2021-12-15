@@ -292,6 +292,10 @@ class CoreUtils {
         return s.map((d) => {
           if (d === null) return null
 
+          if (w.config.yaxis[i].getLogVal) {
+            return w.config.yaxis[i].getLogVal(d)
+          }
+
           return this.getLogVal(d, i)
         })
       } else {

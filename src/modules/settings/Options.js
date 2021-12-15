@@ -14,6 +14,8 @@ export default class Options {
       reversed: false,
       logarithmic: false,
       logBase: 10,
+      logs: undefined,
+      getLogVal: undefined,
       tickAmount: undefined,
       forceNiceScale: false,
       max: undefined,

@@ -1047,6 +1047,8 @@ type ApexYAxis = {
   reversed?: boolean
   logarithmic?: boolean,
   logBase?: number,
+  logs?: number[],
+  getLogVal?: function,
   tickAmount?: number
   forceNiceScale?: boolean
   min?: number | ((min: number) => number)
