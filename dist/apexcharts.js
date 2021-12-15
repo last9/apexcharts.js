@@ -2453,7 +2453,8 @@
       key: "getLogVal",
       value: function getLogVal(d, yIndex) {
         var w = this.w;
-        return (Math.log(d) - Math.log(w.globals.minYArr[yIndex])) / (Math.log(w.globals.maxYArr[yIndex]) - Math.log(w.globals.minYArr[yIndex]));
+        var lv = (Math.log(d) - Math.log(w.globals.minYArr[yIndex])) / (Math.log(w.globals.maxYArr[yIndex]) - Math.log(w.globals.minYArr[yIndex]));
+        return isNaN(lv) ? d : lv;
       }
     }, {
       key: "getLogYRatios",
@@ -11640,12 +11641,16 @@
       }
     }, {
       key: "logarithmicScale",
-      value: function logarithmicScale(yMax, base) {
+      value: function logarithmicScale(yMin, yMax, base) {
         var logs = [];
         var ticks = Math.ceil(Math.log(yMax) / Math.log(base)) + 1; // Get powers of base up to our max, and then one more
 
         for (var i = 0; i < ticks; i++) {
           logs.push(Math.pow(base, i));
+        }
+
+        if (yMin === 0) {
+          logs.unshift(yMin);
         }
 
         return {
@@ -11688,7 +11693,7 @@
 
         if (y.logarithmic && diff > 5) {
           gl.allSeriesCollapsed = false;
-          gl.yAxisScale[index] = this.logarithmicScale(maxY, y.logBase);
+          gl.yAxisScale[index] = this.logarithmicScale(minY, maxY, y.logBase);
         } else {
           if (maxY === -Number.MAX_VALUE || !Utils$1.isNumber(maxY)) {
             // no data in the chart. Either all series collapsed or user passed a blank array
@@ -17912,18 +17917,22 @@
             }
           }
 
-          tooltipEl.style.left = x + w.globals.translateX + 'px';
-
           if (isReversed && !(w.globals.isBarHorizontal && ttCtx.tooltipUtil.hasBars())) {
             y = y + barHeight - (w.globals.series[i][j] < 0 ? barHeight : 0) * 2;
           }
 
           if (ttCtx.tooltipRect.ttHeight + y > w.globals.gridHeight) {
             y = w.globals.gridHeight - ttCtx.tooltipRect.ttHeight + w.globals.translateY;
-            tooltipEl.style.top = y + 'px';
           } else {
-            tooltipEl.style.top = y + w.globals.translateY - ttCtx.tooltipRect.ttHeight / 2 + 'px';
+            y = y + w.globals.translateY - ttCtx.tooltipRect.ttHeight / 2;
+
+            if (y < 0) {
+              y = 0;
+            }
           }
+
+          tooltipEl.style.left = x + w.globals.translateX + 'px';
+          tooltipEl.style.top = y + 'px';
         }
       }
     }, {

@@ -174,6 +174,10 @@ export default class Range {
       logs.unshift(yMin)
     }
 
+    if (yMin === 0) {
+      logs.unshift(yMin)
+    }
+
     return {
       result: logs,
       niceMin: logs[0],
