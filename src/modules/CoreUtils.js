@@ -293,7 +293,7 @@ class CoreUtils {
           if (d === null) return null
 
           if (w.config.yaxis[i].getLogVal) {
-            return w.config.yaxis[i].getLogVal(d)
+            return w.config.yaxis[i].getLogVal(d, i)
           }
 
           return this.getLogVal(d, i)

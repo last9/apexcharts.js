@@ -2443,7 +2443,7 @@
               if (d === null) return null;
 
               if (w.config.yaxis[i].getLogVal) {
-                return w.config.yaxis[i].getLogVal(d);
+                return w.config.yaxis[i].getLogVal(d, i);
               }
 
               return _this.getLogVal(d, i);
@@ -11658,6 +11658,10 @@
           for (var i = 0; i < ticks; i++) {
             logs.push(Math.pow(base, i));
           }
+        }
+
+        if (yMin === 0) {
+          logs.unshift(yMin);
         }
 
         if (yMin === 0 && logs[0] !== 0) {
