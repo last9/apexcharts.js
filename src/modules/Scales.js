@@ -171,10 +171,6 @@ export default class Range {
         logs.push(Math.pow(base, i))
       }
     }
-    
-    if (yMin === 0) {
-      logs.unshift(yMin)
-    }
 
     if (yMin === 0 && logs[0] !== 0) {
       logs.unshift(yMin)

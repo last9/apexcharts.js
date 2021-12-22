@@ -11660,10 +11660,6 @@
           }
         }
 
-        if (yMin === 0) {
-          logs.unshift(yMin);
-        }
-
         if (yMin === 0 && logs[0] !== 0) {
           logs.unshift(yMin);
         }
