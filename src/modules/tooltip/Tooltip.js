@@ -39,6 +39,8 @@ export default class Tooltip {
 
   getElTooltip(ctx) {
     if (!ctx) ctx = this
+    if (!ctx.w.globals.dom.baseEl) return null
+
     return ctx.w.globals.dom.baseEl.querySelector('.apexcharts-tooltip')
   }
 
@@ -66,6 +68,9 @@ export default class Tooltip {
 
     const tooltipEl = document.createElement('div')
     tooltipEl.classList.add('apexcharts-tooltip')
+    if (w.config.tooltip.cssClass) {
+      tooltipEl.classList.add(w.config.tooltip.cssClass)
+    }
     tooltipEl.classList.add(`apexcharts-theme-${this.tConfig.theme}`)
     w.globals.dom.elWrap.appendChild(tooltipEl)
 
@@ -435,6 +440,8 @@ export default class Tooltip {
     let w = chartCtx.w
     const tooltipEl = this.getElTooltip()
 
+    if (!tooltipEl) return
+
     // tooltipRect is calculated on every mousemove, because the text is dynamic
     ttCtx.tooltipRect = {
       x: 0,
@@ -527,6 +534,15 @@ export default class Tooltip {
       e.type === 'touchmove' ||
       e.type === 'mouseup'
     ) {
+      // there is no series to hover over
+      if (
+        w.globals.collapsedSeries.length +
+          w.globals.ancillaryCollapsedSeries.length ===
+        w.globals.series.length
+      ) {
+        return
+      }
+
       if (xcrosshairs !== null) {
         xcrosshairs.classList.add('apexcharts-active')
       }

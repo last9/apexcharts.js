@@ -54,6 +54,11 @@ class Range {
     for (let i = startingIndex; i < len; i++) {
       gl.dataPoints = Math.max(gl.dataPoints, series[i].length)
 
+      if (gl.categoryLabels.length) {
+        gl.dataPoints = gl.categoryLabels.filter(
+          (label) => typeof label !== 'undefined'
+        ).length
+      }
       for (let j = 0; j < gl.series[i].length; j++) {
         let val = series[i][j]
         if (val !== null && Utils.isNumber(val)) {
@@ -457,8 +462,6 @@ class Range {
           newMaxX.setDate(newMaxX.getDate() + 2)
         }
         gl.maxX = new Date(newMaxX).getTime()
-
-        console.log(gl.minX, gl.maxX)
       } else if (
         cnf.xaxis.type === 'numeric' ||
         (cnf.xaxis.type === 'category' && !gl.noLabelsProvided)
@@ -499,7 +502,7 @@ class Range {
             }
           }
         })
-        if (gl.dataPoints === 1 && gl.minXDiff === Number.MAX_VALUE) {
+        if (gl.dataPoints === 1 || gl.minXDiff === Number.MAX_VALUE) {
           // fixes apexcharts.js #1221
           gl.minXDiff = 0.5
         }

@@ -10,7 +10,15 @@ export default class AxesUtils {
   }
 
   // Based on the formatter function, get the label text and position
-  getLabel(labels, timescaleLabels, x, i, drawnLabels = [], fontSize = '12px') {
+  getLabel(
+    labels,
+    timescaleLabels,
+    x,
+    i,
+    drawnLabels = [],
+    fontSize = '12px',
+    isLeafGroup = true
+  ) {
     const w = this.w
     let rawLabel = typeof labels[i] === 'undefined' ? '' : labels[i]
     let label = rawLabel
@@ -22,18 +30,21 @@ export default class AxesUtils {
 
     let xFormat = new Formatters(this.ctx)
     let timestamp = rawLabel
-    label = xFormat.xLabelFormat(xlbFormatter, rawLabel, timestamp, {
-      i,
-      dateFormatter: new DateTime(this.ctx).formatDate,
-      w
-    })
 
-    if (customFormatter !== undefined) {
-      label = customFormatter(rawLabel, labels[i], {
+    if (isLeafGroup) {
+      label = xFormat.xLabelFormat(xlbFormatter, rawLabel, timestamp, {
         i,
         dateFormatter: new DateTime(this.ctx).formatDate,
         w
       })
+
+      if (customFormatter !== undefined) {
+        label = customFormatter(rawLabel, labels[i], {
+          i,
+          dateFormatter: new DateTime(this.ctx).formatDate,
+          w
+        })
+      }
     }
 
     const determineHighestUnit = (unit) => {
@@ -68,7 +79,7 @@ export default class AxesUtils {
 
     let graphics = new Graphics(this.ctx)
     let textRect = {}
-    if (w.globals.rotateXLabels) {
+    if (w.globals.rotateXLabels && isLeafGroup) {
       textRect = graphics.getTextRects(
         label,
         parseInt(fontSize, 10),

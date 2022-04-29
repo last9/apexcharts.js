@@ -72,19 +72,18 @@ export default class Utils {
     let seriesXValArr = []
     let seriesYValArr = []
 
-    for (let s = 0; s < w.globals.seriesXvalues.length; s++) {
-      seriesXValArr.push(
-        [w.globals.seriesXvalues[s][0] - 0.000001].concat(
-          w.globals.seriesXvalues[s]
-        )
-      )
-    }
-
-    seriesXValArr = seriesXValArr.map((seriesXVal) => {
-      return seriesXVal.filter((s) => s)
+    //add extra values to show markers for the first points. Included both axes to avoid incorrect positioning of the marker
+    w.globals.seriesXvalues.forEach((value) => {
+      seriesXValArr.push([value[0] + 0.000001].concat(value))
+    })
+    w.globals.seriesYvalues.forEach((value) => {
+      seriesYValArr.push([value[0] + 0.000001].concat(value))
     })
 
-    seriesYValArr = w.globals.seriesYvalues.map((seriesYVal) => {
+    seriesXValArr = seriesXValArr.map((seriesXVal) => {
+      return seriesXVal.filter((s) => Utilities.isNumber(s))
+    })
+    seriesYValArr = seriesYValArr.map((seriesYVal) => {
       return seriesYVal.filter((s) => Utilities.isNumber(s))
     })
 
@@ -149,28 +148,34 @@ export default class Utils {
       currIndex = 0
     }
 
-    let currY = Yarrays[activeIndex][0]
     let currX = Xarrays[activeIndex][0]
-
     let diffX = Math.abs(hoverX - currX)
-    let diffY = Math.abs(hoverY - currY)
-    let diff = diffY + diffX
 
-    Yarrays.map((arrY, arrIndex) => {
-      arrY.map((y, innerKey) => {
-        let newdiffY = Math.abs(hoverY - Yarrays[arrIndex][innerKey])
-        let newdiffX = Math.abs(hoverX - Xarrays[arrIndex][innerKey])
-        let newdiff = newdiffX + newdiffY
-
-        if (newdiff < diff) {
-          diff = newdiff
-          diffX = newdiffX
-          diffY = newdiffY
-          currIndex = arrIndex
-          j = innerKey
+    // find nearest point on x-axis
+    Xarrays.forEach((arrX) => {
+      arrX.forEach((x, iX) => {
+        const newDiff = Math.abs(hoverX - x)
+        if (newDiff < diffX) {
+          diffX = newDiff
+          j = iX
         }
       })
     })
+
+    if (j !== -1) {
+      // find nearest graph on y-axis relevanted to nearest point on x-axis
+      let currY = Yarrays[activeIndex][j]
+      let diffY = Math.abs(hoverY - currY)
+      currIndex = activeIndex
+
+      Yarrays.forEach((arrY, iAY) => {
+        const newDiff = Math.abs(hoverY - arrY[j])
+        if (newDiff < diffY) {
+          diffY = newDiff
+          currIndex = iAY
+        }
+      })
+    }
 
     return {
       index: currIndex,
@@ -179,6 +184,7 @@ export default class Utils {
   }
 
   getFirstActiveXArray(Xarrays) {
+    const w = this.w
     let activeIndex = 0
 
     let firstActiveSeriesIndex = Xarrays.map((xarr, index) => {
@@ -186,7 +192,11 @@ export default class Utils {
     })
 
     for (let a = 0; a < firstActiveSeriesIndex.length; a++) {
-      if (firstActiveSeriesIndex[a] !== -1) {
+      if (
+        firstActiveSeriesIndex[a] !== -1 &&
+        w.globals.collapsedSeriesIndices.indexOf(a) === -1 &&
+        w.globals.ancillaryCollapsedSeriesIndices.indexOf(a) === -1
+      ) {
         activeIndex = firstActiveSeriesIndex[a]
         break
       }
@@ -285,10 +295,9 @@ export default class Utils {
 
     markersWraps = [...markersWraps]
     markersWraps.sort((a, b) => {
-      return Number(b.getAttribute('data:realIndex')) <
-        Number(a.getAttribute('data:realIndex'))
-        ? 0
-        : -1
+      var indexA = Number(a.getAttribute('data:realIndex'))
+      var indexB = Number(b.getAttribute('data:realIndex'))
+      return indexB < indexA ? 1 : indexB > indexA ? -1 : 0
     })
 
     let markers = []

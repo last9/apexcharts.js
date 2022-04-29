@@ -890,6 +890,7 @@ export default class Options {
         custom: undefined,
         fillSeriesColor: false,
         theme: 'light',
+        cssClass: '',
         style: {
           fontSize: '12px',
           fontFamily: undefined
@@ -964,6 +965,16 @@ export default class Options {
             hour: 'HH:mm',
             minute: 'HH:mm:ss',
             second: 'HH:mm:ss'
+          }
+        },
+        group: {
+          groups: [],
+          style: {
+            colors: [],
+            fontSize: '12px',
+            fontWeight: 400,
+            fontFamily: undefined,
+            cssClass: ''
           }
         },
         axisBorder: {

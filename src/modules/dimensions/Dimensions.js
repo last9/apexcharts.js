@@ -41,6 +41,15 @@ export default class Dimensions {
 
     this.lgRect = this.dimHelpers.getLegendsRect()
 
+    if (
+      this.isSparkline &&
+      (w.config.markers.discrete.length > 0 || w.config.markers.size > 0)
+    ) {
+      Object.entries(this.gridPad).forEach(([k, v]) => {
+        this.gridPad[k] = Math.max(v, this.w.globals.markers.largestSize / 1.5)
+      })
+    }
+
     if (gl.axisCharts) {
       // for line / area / scatter / column
       this.setDimensionsForAxisCharts()
@@ -97,15 +106,16 @@ export default class Dimensions {
     this.yAxisWidth = this.dimYAxis.getTotalYAxisWidth()
 
     let xaxisLabelCoords = this.dimXAxis.getxAxisLabelsCoords()
+    let xaxisGroupLabelCoords = this.dimXAxis.getxAxisGroupLabelsCoords()
     let xtitleCoords = this.dimXAxis.getxAxisTitleCoords()
 
-    this.conditionalChecksForAxisCoords(xaxisLabelCoords, xtitleCoords)
+    this.conditionalChecksForAxisCoords(xaxisLabelCoords, xtitleCoords, xaxisGroupLabelCoords)
 
     gl.translateXAxisY = w.globals.rotateXLabels ? this.xAxisHeight / 8 : -4
     gl.translateXAxisX =
       w.globals.rotateXLabels &&
-      w.globals.isXNumeric &&
-      w.config.xaxis.labels.rotate <= -45
+        w.globals.isXNumeric &&
+        w.config.xaxis.labels.rotate <= -45
         ? -this.xAxisWidth / 4
         : 0
 
@@ -121,6 +131,7 @@ export default class Dimensions {
     let yAxisWidth = this.yAxisWidth
     let xAxisHeight = this.xAxisHeight
     gl.xAxisLabelsHeight = this.xAxisHeight - xtitleCoords.height
+    gl.xAxisGroupLabelsHeight = gl.xAxisLabelsHeight - xaxisLabelCoords.height
     gl.xAxisLabelsWidth = this.xAxisWidth
     gl.xAxisHeight = this.xAxisHeight
     let translateY = 10
@@ -208,8 +219,8 @@ export default class Dimensions {
 
     const type =
       cnf.chart.type === 'pie' ||
-      cnf.chart.type === 'polarArea' ||
-      cnf.chart.type === 'donut'
+        cnf.chart.type === 'polarArea' ||
+        cnf.chart.type === 'donut'
         ? 'pie'
         : 'radialBar'
 
@@ -259,10 +270,12 @@ export default class Dimensions {
     }
   }
 
-  conditionalChecksForAxisCoords(xaxisLabelCoords, xtitleCoords) {
+  conditionalChecksForAxisCoords(xaxisLabelCoords, xtitleCoords, xaxisGroupLabelCoords) {
     const w = this.w
 
-    const baseXAxisHeight = xaxisLabelCoords.height + xtitleCoords.height
+    const xAxisNum = (w.globals.hasGroups ? 2 : 1)
+
+    const baseXAxisHeight = xaxisGroupLabelCoords.height + xaxisLabelCoords.height + xtitleCoords.height
     const xAxisHeightMultiplicate = w.globals.isMultiLineX
       ? 1.2
       : w.globals.LINE_HEIGHT_RATIO
@@ -273,7 +286,7 @@ export default class Dimensions {
 
     this.xAxisHeight =
       baseXAxisHeight * xAxisHeightMultiplicate +
-      rotatedXAxisOffset +
+      xAxisNum * rotatedXAxisOffset +
       additionalOffset
 
     this.xAxisWidth = xaxisLabelCoords.width

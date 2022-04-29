@@ -156,6 +156,64 @@ export default class DimXAxis {
   }
 
   /**
+   * Get X Axis Label Group height
+   * @memberof Dimensions
+   * @return {{width, height}}
+   */
+  getxAxisGroupLabelsCoords() {
+    let w = this.w
+
+    if (!w.globals.hasGroups) {
+      return { width: 0, height: 0 }
+    }
+
+    const fontSize =
+      w.config.xaxis.group.style?.fontSize ||
+      w.config.xaxis.labels.style.fontSize
+
+    let xaxisLabels = w.globals.groups.map((g) => g.title)
+
+    let rect
+
+    // prevent changing xaxisLabels to avoid issues in multi-yaxes - fix #522
+    let val = Utils.getLargestStringFromArr(xaxisLabels)
+    let valArr = this.dCtx.dimHelpers.getLargestStringFromMultiArr(
+      val,
+      xaxisLabels
+    )
+
+    let graphics = new Graphics(this.dCtx.ctx)
+    let xLabelrect = graphics.getTextRects(val, fontSize)
+    let xArrLabelrect = xLabelrect
+    if (val !== valArr) {
+      xArrLabelrect = graphics.getTextRects(valArr, fontSize)
+    }
+
+    rect = {
+      width:
+        xLabelrect.width >= xArrLabelrect.width
+          ? xLabelrect.width
+          : xArrLabelrect.width,
+      height:
+        xLabelrect.height >= xArrLabelrect.height
+          ? xLabelrect.height
+          : xArrLabelrect.height
+    }
+
+    if (!w.config.xaxis.labels.show) {
+      rect = {
+        width: 0,
+        height: 0
+      }
+    }
+
+    return {
+      width: rect.width,
+      height: rect.height
+    }
+  }
+
+  /**
    * Get X Axis Title Dimensions
    * @memberof Dimensions
    * @return {{width, height}}
